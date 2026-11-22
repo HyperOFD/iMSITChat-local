@@ -4,13 +4,22 @@ plugins {
 
 def frontend = rootProject.file('../frontend')
 def bundledUi = layout.buildDirectory.dir('generated/chatAssets')
+def projectLicense = rootProject.file('../LICENSE')
 def buildChatUi = tasks.register('buildChatUi', Exec) {
     inputs.dir(new File(frontend, 'src'))
+    inputs.dir(new File(frontend, 'public'))
+    inputs.file(projectLicense)
     inputs.files(fileTree(frontend) { include '*.json', '*.cjs', '*.ts', 'index.html' })
     outputs.dir(bundledUi)
     workingDir frontend
     def npm = System.getProperty('os.name').toLowerCase().contains('windows') ? ['cmd', '/c', 'npm.cmd'] : ['npm']
     commandLine(npm + ['run', 'build', '--', '--mode', 'android', '--emptyOutDir', '--outDir', bundledUi.get().asFile.absolutePath])
+    doLast {
+        copy {
+            from projectLicense
+            into bundledUi
+        }
+    }
 }
 
 android {

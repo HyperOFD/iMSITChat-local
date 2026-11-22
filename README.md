@@ -88,3 +88,9 @@ docker compose --profile test run --build --rm tests
 ## Материалы для защиты
 
 [Архитектура](docs/architecture.md) · [ER-диаграмма](docs/erd.md) · [REST и WebSocket](docs/api.md) · [Безопасность](docs/security.md) · [Тесты](docs/testing.md) · [Соответствие заданию](docs/requirements.md) · [Сценарий защиты](docs/demo.md) · [План для пары](docs/team-plan.md)
+
+## Лицензия
+
+Исходный код iMSITChat распространяется по GNU General Public License версии 3 (`GPL-3.0-only`). [Полный текст лицензии](LICENSE).
+
+Сторонние библиотеки, иконки и шрифты распространяются по лицензиям их авторов. [Уведомления для компонентов интерфейса](frontend/public/THIRD_PARTY_NOTICES.txt).
