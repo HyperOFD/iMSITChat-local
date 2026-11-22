@@ -1,0 +1,40 @@
+plugins {
+    id 'com.android.application'
+}
+
+def frontend = rootProject.file('../frontend')
+def bundledUi = layout.buildDirectory.dir('generated/chatAssets')
+def buildChatUi = tasks.register('buildChatUi', Exec) {
+    inputs.dir(new File(frontend, 'src'))
+    inputs.files(fileTree(frontend) { include '*.json', '*.cjs', '*.ts', 'index.html' })
+    outputs.dir(bundledUi)
+    workingDir frontend
+    def npm = System.getProperty('os.name').toLowerCase().contains('windows') ? ['cmd', '/c', 'npm.cmd'] : ['npm']
+    commandLine(npm + ['run', 'build', '--', '--mode', 'android', '--emptyOutDir', '--outDir', bundledUi.get().asFile.absolutePath])
+}
+
+android {
+    namespace 'ru.imsit.chat'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'ru.imsit.chat'
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName '1.0'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    buildTypes {
+        local {
+            initWith release
+            signingConfig signingConfigs.debug
+            debuggable false
+        }
+    }
+    sourceSets.main.assets.srcDir(bundledUi)
+}
+
+tasks.named('preBuild').configure { dependsOn buildChatUi }

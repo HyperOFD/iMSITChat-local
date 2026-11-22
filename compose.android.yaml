@@ -1,0 +1,9 @@
+# Optional Wi-Fi access for the Android client. Set ANDROID_LAN_IP to the computer's LAN address.
+services:
+  frontend:
+    ports: !override
+      - "127.0.0.1:${CHAT_PORT:-8080}:80"
+      - "${ANDROID_LAN_IP:?Set ANDROID_LAN_IP in .env}:${CHAT_PORT:-8080}:80"
+  backend:
+    environment:
+      ALLOWED_ORIGINS: "http://localhost:${CHAT_PORT:-8080},http://127.0.0.1:${CHAT_PORT:-8080},http://${ANDROID_LAN_IP:?Set ANDROID_LAN_IP in .env}:${CHAT_PORT:-8080}"

@@ -1,0 +1,7 @@
+# Overlay for an independent Compose project. The browser suite uses only this port.
+services:
+  frontend:
+    ports: !override ["127.0.0.1:18080:80"]
+  backend:
+    environment:
+      ALLOWED_ORIGINS: http://127.0.0.1:18080

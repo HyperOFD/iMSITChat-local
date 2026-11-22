@@ -1,0 +1,14 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <application android:label="iMSITChat" android:icon="@drawable/chat_icon"
+        android:enableOnBackInvokedCallback="true" android:theme="@style/ChatTheme" android:allowBackup="false" android:usesCleartextTraffic="true">
+        <activity android:name=".ChatActivity" android:exported="true"
+            android:configChanges="keyboardHidden|orientation|screenSize|smallestScreenSize|screenLayout"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

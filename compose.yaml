@@ -1,0 +1,70 @@
+name: imsitchat-practice
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: imsit
+      POSTGRES_DB: imsit
+      POSTGRES_PASSWORD_FILE: /credentials/password
+    entrypoint: ["sh", "/init/postgres.sh"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - credentials:/credentials
+      - ./deploy/postgres.sh:/init/postgres.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U imsit -d imsit"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  backend:
+    build: ./backend
+    environment:
+      DB_PASSWORD_FILE: /credentials/password
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    volumes:
+      - credentials:/credentials:ro
+    depends_on:
+      db: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 3s
+      timeout: 4s
+      retries: 20
+  frontend:
+    build: ./frontend
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/api/health"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    ports: ["127.0.0.1:${CHAT_PORT:-8080}:80"]
+    depends_on:
+      backend: {condition: service_healthy}
+  test-db:
+    image: postgres:16-alpine
+    profiles: [test]
+    environment:
+      POSTGRES_DB: imsit_test
+      POSTGRES_USER: tester
+      POSTGRES_HOST_AUTH_METHOD: trust
+    tmpfs: [/var/lib/postgresql/data]
+    networks: [tests]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "tester", "-d", "imsit_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  tests:
+    profiles: [test]
+    build: {context: ./backend, target: tests}
+    networks: [tests]
+    depends_on:
+      test-db: {condition: service_healthy}
+    environment:
+      TEST_DATABASE_URL: postgresql+asyncpg://tester@test-db/imsit_test
+volumes:
+  pgdata:
+  credentials:
+networks:
+  tests:
